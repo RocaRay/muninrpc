@@ -525,6 +525,7 @@ var mainRequestActions;
         Type["HANDLE_UNARY_REQUEST"] = "HANDLE_UNARY_REQUEST";
         Type["HANDLE_CLIENT_STREAM_START"] = "HANDLE_CLIENT_STREAM_START";
         Type["SET_GRPC_RESPONSE"] = "SET_GRPC_RESPONSE";
+        Type["HANDLE_SEND_MESSAGE"] = "HANDLE_SEND_MESSAGE";
     })(Type = mainRequestActions.Type || (mainRequestActions.Type = {}));
     mainRequestActions.setGRPCResponse = function (response) { return typesafe_actions_1.action(Type.SET_GRPC_RESPONSE, response); };
     mainRequestActions.handleUnaryRequest = function () { return function (dispatch, getState) {
@@ -535,6 +536,7 @@ var mainRequestActions;
             var mergedConfig = __assign({}, activeTab.baseConfig, requestConfig);
             var handler = grpcHandlerFactory_1.GrpcHandlerFactory.createHandler(mergedConfig);
             state.handlers[state.selectedTab] = handler;
+            state.handlerInfo[state.selectedTab].responseMetrics = "Request called at: " + (new Date()).toLocaleTimeString();
             handler.initiateRequest().then(function (response) {
                 dispatch(mainRequestActions.setGRPCResponse(response));
             });
@@ -548,14 +550,14 @@ var mainRequestActions;
             var mergedConfig = __assign({}, activeTab.baseConfig, requestConfig);
             var handler = grpcHandlerFactory_1.GrpcHandlerFactory.createHandler(mergedConfig);
             handler.initiateRequest();
-            var now = new Date();
-            state.handlerInfo[state.selectedTab].responseMetrics = "Stream started at: " + now.toLocaleTimeString();
+            state.handlerInfo[state.selectedTab].responseMetrics = "Stream started at: " + (new Date()).toLocaleTimeString();
             //console.log('Starting stream!')
             var writableStream = handler.returnHandler().writableStream;
             //console.log('writable stream:', writableStream)
             state.handlers[state.selectedTab] = writableStream;
         }
     }; };
+    mainRequestActions.handleSendMessage = function () { return typesafe_actions_1.action(Type.HANDLE_SEND_MESSAGE); };
 })(mainRequestActions = exports.mainRequestActions || (exports.mainRequestActions = {}));
 
 
@@ -591,7 +593,7 @@ function Header(props, context) {
             handleClientStreamStart();
             toggleStream(true);
         } }, "START STREAM"));
-    var writeToStreamButton = (React.createElement("button", { className: 'write-stream-btn', onClick: function () { return handlers[selectedTab].write(activeTab.configArguments.arguments); } }, "SEND MESSAGE"));
+    var writeToStreamButton = (React.createElement("button", { className: 'write-stream-btn', onClick: props.handleSendMessage }, "SEND MESSAGE"));
     switch (callType) {
         case grpcHandlerFactory_1.CallType.UNARY_CALL: {
             userConnectType = "UNARY";
@@ -637,8 +639,7 @@ function Header(props, context) {
                 displayButton,
                 React.createElement("button", { className: "stop-button", disabled: disabledFlag, onClick: function () {
                         handlers[selectedTab].end();
-                        var endTime = new Date();
-                        handlerInfo[selectedTab].responseMetrics = "Stream ended at: " + endTime.toLocaleTimeString();
+                        handlerInfo[selectedTab].responseMetrics = "Stream ended at: " + (new Date()).toLocaleTimeString();
                         toggleStream(false);
                     } }, "STOP STREAM")),
             React.createElement("div", { className: "header-right" },
@@ -1398,12 +1399,17 @@ exports.mainReducer = function (state, action) {
         case actions_1.mainRequestActions.Type.SET_GRPC_RESPONSE: {
             var newHandlerInfo = cloneDeep(state.handlerInfo);
             newHandlerInfo[state.selectedTab].serverResponse = action.payload;
-            newHandlerInfo[state.selectedTab].responseMetrics = "Success";
             return __assign({}, state, { handlerInfo: newHandlerInfo });
         }
         case actions_1.mainActions.Type.TOGGLE_STREAM: {
             var newHandlerInfo = cloneDeep(state.handlerInfo);
             newHandlerInfo[state.selectedTab].isStreaming = action.payload;
+            return __assign({}, state, { handlerInfo: newHandlerInfo });
+        }
+        case actions_1.mainRequestActions.Type.HANDLE_SEND_MESSAGE: {
+            state.handlers[state.selectedTab].write(state.activeTab.configArguments.arguments);
+            var newHandlerInfo = cloneDeep(state.handlerInfo);
+            newHandlerInfo[state.selectedTab].responseMetrics = "Message sent at: " + (new Date()).toLocaleTimeString();
             return __assign({}, state, { handlerInfo: newHandlerInfo });
         }
         default: {
