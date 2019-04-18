@@ -34,12 +34,10 @@ function AddItem(call, callback) {
 function CalculateAverage(call, callback) {
     var numCache = [];
     call.on("data", function (data) {
-        console.log('receiving data:', data);
         numCache.push(data.numb);
     });
     call.on("end", function () {
         var average = numCache.reduce(function (acc, curr) { return acc + curr; }) / numCache.length;
-        console.log('received end request');
         callback(null, { average: average });
     });
 }
@@ -49,11 +47,16 @@ function CalculateAverage(call, callback) {
  *
  */
 function TestServerStream(call) {
-    var responseArr = [{ numb: 1 }, { numb: 2 }, { numb: 3 }, { numb: 4 }, { numb: 5 }];
-    responseArr.forEach(function (val) {
-        call.write(val);
-    });
-    call.end();
+    let stopID = setInterval( () => {
+        let randomInt = Math.floor(Math.random() * 100)
+        console.log('sending random int:',randomInt)
+        call.write({numb: randomInt})
+    }
+    , 500)
+    setTimeout( () => {
+        clearInterval(stopID);
+        call.end();
+    }, 1000 * 30)
 }
 /**
  *
