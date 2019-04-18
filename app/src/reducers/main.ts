@@ -44,6 +44,7 @@ export const mainReducer = (state: MainModel = initialState, action: Types.RootA
         tabKey: newSelectedTab,
         getTabState: action.payload.getTabState,
         updateTabNames: action.payload.updateTabNames,
+        setGRPCResponse: action.payload.setGRPCResponse,
       });
       newLeftArray.push(leftEle);
 
@@ -129,11 +130,18 @@ export const mainReducer = (state: MainModel = initialState, action: Types.RootA
       };
     }
 
-    case mainRequestActions.Type.SET_GRPC_RESPONSE: {
-      let newHandlerInfo = cloneDeep(state.handlerInfo);
-      newHandlerInfo[state.selectedTab].serverResponse = action.payload;
-      // console.log('action.payload inside of reducer', action.payload instanceof Error)
-      if (action.payload instanceof Error) newHandlerInfo[state.selectedTab].responseMetrics.request = "ERROR";
+    case mainRequestActionType.SET_GRPC_RESPONSE: {
+      const newHandlerInfo = cloneDeep(state.handlerInfo);
+      if (action.payload.response instanceof Error) {
+        newHandlerInfo[action.payload.tabKey].serverResponse = [{type: 'read', payload: action.payload.response.message}]
+        newHandlerInfo[action.payload.tabKey].responseMetrics = {
+          timeStamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
+          request: `Error`,
+        };
+        newHandlerInfo[action.payload.tabKey].isStreaming = false;
+      } else {
+        newHandlerInfo[action.payload.tabKey].serverResponse = action.payload.response;
+      }
       return {
         ...state,
         handlerInfo: newHandlerInfo,

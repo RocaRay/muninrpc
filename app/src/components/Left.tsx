@@ -13,6 +13,7 @@ import {
   GrpcHandlerFactory,
 } from "../../lib/local/grpcHandlerFactory";
 import * as cloneDeep from "lodash.clonedeep";
+import { any } from "prop-types";
 
 interface LeftProps {
   handlerContext: [];
@@ -26,7 +27,20 @@ interface LeftProps {
   mode: string;
   baseConfig: {};
   configElements: {};
-  configArguments: {};
+  configArguments: { arguments: {} };
+  messageRecommendations: string[];
+  messageTrie: Trie;
+  messageTrieInput: string;
+  requestRecommendations: string[];
+  requestTrie: Trie;
+  requestTrieInput: string;
+  serviceRecommendations: string[];
+  serviceTrie: Trie;
+  serviceTrieInput: string;
+  cleanConfigArgs: { arguments: {} };
+  getTabState: (state: LeftProps) => { type: string; payload: LeftProps };
+  updateTabNames: (o: { val: string; tabKey: string }) => void;
+  setGRPCResponse: ({response: string, tabKey}) => any;
 }
 
 enum Mode {
@@ -45,18 +59,17 @@ export const LeftFactory = props => {
 
       tabName: "New Connection",
       handlerContext: [],
-      filePath: "",
+      filePath: "Upload your proto file to get started",
       serviceList: {},
       messageList: [],
       selectedService: "",
       selectedRequest: "",
       mode: "SERVICE_AND_REQUEST",
-      baseConfig: { grpcServerURI: "", packageDefinition: null, packageName: "", serviceName: "" },
+      baseConfig: { grpcServerURI: "", packageDefinition: null, packageName: "", serviceName: "", onErrCb: (err) => props.setGRPCResponse({response: err, tabKey: props.tabKey}) },
       requestConfig: { requestName: "", callType: null, argument: {}, callbacks: null },
       configElements: {},
-      configArguments: {},
-      cleanConfigArgs: {},
-
+      configArguments: { arguments: {} },
+      cleanConfigArgs: { arguments: {} },
       messageRecommendations: [],
       messageTrie: new Trie(),
       messageTrieInput: "",
@@ -186,6 +199,11 @@ export const LeftFactory = props => {
       // handle file
       const filePath = file[0].path;
       const packageDefinition = pbActions.loadProtoFile(filePath);
+      if (packageDefinition instanceof Error) {
+        state.baseConfig.onErrCb(packageDefinition);
+        throw new Error("Cannot load protofile");
+      }
+
       const { protoServices, protoMessages } = pbActions.parsePackageDefinition(packageDefinition);
 
       // populate tries
@@ -213,7 +231,7 @@ export const LeftFactory = props => {
     };
 
     const handleRepeatedClick = payload => {
-      let keys = payload.id.split(".").slice(1);
+      const keys = payload.id.split(".").slice(1);
 
       function findNestedValue(context, keyArray, clean = false) {
         // base case
@@ -222,7 +240,7 @@ export const LeftFactory = props => {
         }
         // recu case
         if (keyArray[0].match("@")) {
-          let loc = clean ? 0 : Number(keyArray[0].match(/\d+$/)[0]);
+          const loc = clean ? 0 : Number(keyArray[0].match(/\d+$/)[0]);
           let con = keyArray[0];
           con = con.match(/(.+)@/)[1];
           return findNestedValue(context[con][loc], keyArray.slice(1), clean);
@@ -232,10 +250,10 @@ export const LeftFactory = props => {
       }
 
       // find the correct location
-      let context = findNestedValue(state.configArguments.arguments, keys);
-      let cleanContext = findNestedValue(state.cleanConfigArgs.arguments, keys, true);
-      let baseKey = keys[keys.length - 1].match(/(.+)@/)[1];
-      let baseLoc = Number(keys[keys.length - 1].match(/\d+$/)[0]);
+      const context = findNestedValue(state.configArguments.arguments, keys);
+      const cleanContext = findNestedValue(state.cleanConfigArgs.arguments, keys, true);
+      const baseKey = keys[keys.length - 1].match(/(.+)@/)[1];
+      const baseLoc = Number(keys[keys.length - 1].match(/\d+$/)[0]);
 
       if (payload.request === "add") {
         context[baseKey][context[baseKey].length] = cloneDeep(cleanContext[baseKey][0]);
@@ -325,8 +343,8 @@ export const LeftFactory = props => {
         <input
           className={"tab-header"}
           value={state.tabName}
-          onClick={() => console.log(state)}
-          onChange={(e) => handleTabNameChange(e.target.value)}
+          onClick={() => (process.env.NODE_ENV === "development" ? console.log(state) : null)}
+          onChange={e => handleTabNameChange(e.target.value)}
           style={{ color: "black" }}
         />
         <div className="input-header">

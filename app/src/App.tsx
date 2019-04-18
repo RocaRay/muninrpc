@@ -27,11 +27,7 @@ const MapDispatchToProps = (dispatch: Dispatch<RootAction>) => bindActionCreator
 class App extends React.Component<AppProps & actions, {}> {
   constructor(props: AppProps & actions) {
     super(props);
-    this.props.addNewTab({getTabState: this.props.getTabState, updateTabNames: this.props.updateTabNames});
-  }
-
-  componentDidMount() {
-    
+    this.props.addNewTab({ getTabState: this.props.getTabState, updateTabNames: this.props.updateTabNames, setGRPCResponse: this.props.setGRPCResponse });
   }
 
   render() {

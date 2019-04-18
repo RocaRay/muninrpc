@@ -9,28 +9,31 @@ import {
 } from "../../lib/local/grpcHandlerFactory";
 import { cloneDeep } from "@babel/types";
 
-export namespace mainRequestActions {
-  export enum Type {
-    HANDLE_UNARY_REQUEST = "HANDLE_UNARY_REQUEST",
-    HANDLE_CLIENT_STREAM_START = "HANDLE_CLIENT_STREAM_START",
-    HANDLE_SERVER_STREAM_START = "HANDLE_SERVER_STREAM_START",
-    HANDLE_BIDI_STREAM_START = "HANDLE_BIDI_STREAM_START",
-    SET_GRPC_RESPONSE = "SET_GRPC_RESPONSE",
-    HANDLE_SEND_MESSAGE = "HANDLE_SEND_MESSAGE",
-    HANDLE_STOP_STREAM = "HANDLE_STOP_STREAM",
-    HANDLE_RECIEVE_MESSAGE = "HANDLE_RECIEVE_MESSAGE",
-  }
-
-  export const setGRPCResponse = (response: object) => action(Type.SET_GRPC_RESPONSE, response);
-
-  export const handleUnaryRequest = () => (dispatch, getState) => {
+export enum mainRequestActionType {
+  HANDLE_UNARY_REQUEST = "HANDLE_UNARY_REQUEST",
+  HANDLE_CLIENT_STREAM_START = "HANDLE_CLIENT_STREAM_START",
+  HANDLE_SERVER_STREAM_START = "HANDLE_SERVER_STREAM_START",
+  HANDLE_BIDI_STREAM_START = "HANDLE_BIDI_STREAM_START",
+  SET_GRPC_RESPONSE = "SET_GRPC_RESPONSE",
+  HANDLE_SEND_MESSAGE = "HANDLE_SEND_MESSAGE",
+  HANDLE_STOP_STREAM = "HANDLE_STOP_STREAM",
+  HANDLE_RECIEVE_MESSAGE = "HANDLE_RECIEVE_MESSAGE",
+}
+export const mainRequestActions = {
+  handleSendMessage: () => action(mainRequestActionType.HANDLE_SEND_MESSAGE),
+  handleRecieveMessage: () => action(mainRequestActionType.HANDLE_RECIEVE_MESSAGE),
+  handleStopStream: (type?: string) => action(mainRequestActionType.HANDLE_STOP_STREAM, type),
+  setGRPCResponse: (res: {response: object, tabKey: string}) => action(mainRequestActionType.SET_GRPC_RESPONSE, res),
+  handleUnaryRequest: () => (dispatch, getState) => {
     const activeTab = getState().main.activeTab;
     const state = getState().main;
+    const selectedTab = state.selectedTab;
 
     if (activeTab.requestConfig.callType === CallType.UNARY_CALL) {
       const requestConfig: RequestConfig<void> = {
         ...activeTab.requestConfig,
         argument: activeTab.configArguments.arguments,
+        
       };
       const mergedConfig: BaseConfig & RequestConfig<void> = {
         ...activeTab.baseConfig,
@@ -46,16 +49,10 @@ export namespace mainRequestActions {
       handler
         .initiateRequest()
         .then(response => {
-          console.log();
-          dispatch(
-            setGRPCResponse([
-              { type: "read", payload: response },
-              { type: "write", payload: activeTab.configArguments.arguments },
-            ]),
-          );
+          dispatch(mainRequestActions.setGRPCResponse({response: response, tabKey: selectedTab}) );
         })
         .catch(error => {
-          dispatch(setGRPCResponse(error));
+          dispatch(mainRequestActions.setGRPCResponse({response: error, tabKey: selectedTab}));
         });
     }
   };
@@ -63,15 +60,29 @@ export namespace mainRequestActions {
   export const handleClientStreamStart = () => (dispatch, getState) => {
     const activeTab = getState().main.activeTab;
     const state = getState().main;
+    const selectedTab = state.selectedTab;
 
     if (activeTab.requestConfig.callType === CallType.CLIENT_STREAM) {
       const requestConfig: RequestConfig<ClientStreamCbs> = {
         ...activeTab.requestConfig,
         callbacks: {
           onEndReadCb: res => {
-            dispatch(setGRPCResponse([{type: 'read', payload: res}, ...getState().main.handlerInfo[state.selectedTab].serverResponse]))
+            dispatch(
+              mainRequestActions.setGRPCResponse({
+                response: [{ 
+                  type: "read", 
+                  payload: res 
+                  },
+                  ...getState().main.handlerInfo[state.selectedTab].serverResponse,
+                ], 
+                tabKey: selectedTab
+              }),
+            );
           },
-          onDataWriteCb: res => setTimeout(() => { dispatch(setGRPCResponse(res))}, 1)
+          onDataWriteCb: response =>
+            setTimeout(() => {
+              dispatch(mainRequestActions.setGRPCResponse({response: response, tabKey: selectedTab}));
+            }, 1),
         },
         argument: {},
       };
@@ -99,12 +110,12 @@ export namespace mainRequestActions {
       const requestConfig: RequestConfig<BidiAndServerStreamCbs> = {
         ...activeTab.requestConfig,
         callbacks: {
-          onDataReadCb: res => {
-            dispatch(setGRPCResponse(res));
-            dispatch(handleRecieveMessage());
+          onDataReadCb: response => {
+            dispatch(mainRequestActions.setGRPCResponse({response: response, tabKey: selectedTab}));
+            dispatch(mainRequestActions.handleRecieveMessage());
           },
-          onEndReadCb: res => {
-            dispatch(handleStopStream("server_end"));
+          onEndReadCb: response => {
+            dispatch(mainRequestActions.handleStopStream("server_end"));
           },
         },
         argument: {},
@@ -134,10 +145,7 @@ export namespace mainRequestActions {
       const requestConfig: RequestConfig<BidiAndServerStreamCbs> = {
         ...activeTab.requestConfig,
         callbacks: {
-          onDataReadCb: res => dispatch(setGRPCResponse(res)),
-          onDataWriteCb: res => {
-            console.log("Writing data from client to server:", res);
-          },
+          onDataReadCb: response => dispatch(mainRequestActions.setGRPCResponse({response: response, tabKey: selectedTab})),
           onEndReadCb: () => {
             dispatch(handleStopStream());
           },

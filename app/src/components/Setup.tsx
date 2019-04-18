@@ -6,29 +6,17 @@ export interface SetupProps {
   messageList: any;
   selectedService: string;
   selectedRequest: string;
-
   configElements: any;
   configArguments: any;
-
   handleRepeatedClick: any;
   handleConfigInput: any;
 }
 
 export default function Setup(props: SetupProps, context?: any) {
-  const {
-    handleConfigInput,
-    handleRepeatedClick,
-    serviceList,
-    selectedService,
-    selectedRequest,
-  } = props;
+  const { handleConfigInput, handleRepeatedClick, serviceList, selectedService, selectedRequest } = props;
+  const additionalMessages: JSX.Element[] = [];
 
-  function generateFields(
-    cfgArgs: any,
-    cfgEle: any,
-    depth = 0,
-    path = "",
-  ): JSX.Element[] | JSX.Element {
+  function generateFields(cfgArgs: any, cfgEle: any, depth = 0, path = "") {
     function findNestedValue(context, keyArray) {
       // base case
       if (keyArray.length === 1) {
@@ -186,7 +174,7 @@ export default function Setup(props: SetupProps, context?: any) {
                         props.configArguments.arguments,
                         (path + "." + field + "@" + idx).split(".").slice(1),
                       )}
-                      className={pos}
+                      className={pos.toString()}
                       onChange={e =>
                         handleConfigInput({
                           id: path + "." + field + "@" + idx,
@@ -217,14 +205,9 @@ export default function Setup(props: SetupProps, context?: any) {
                   </div>
                   <input
                     id={path + "." + field}
-                    value={findNestedValue(
-                      props.configArguments.arguments,
-                      (path + "." + field).split(".").slice(1),
-                    )}
-                    className={pos}
-                    onChange={e =>
-                      handleConfigInput({ id: path + "." + field, value: e.target.value })
-                    }
+                    value={findNestedValue(props.configArguments.arguments, (path + "." + field).split(".").slice(1))}
+                    className={pos.toString()}
+                    onChange={e => handleConfigInput({ id: path + "." + field, value: e.target.value })}
                   />
                 </li>,
               );
