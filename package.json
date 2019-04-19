@@ -78,8 +78,14 @@
   "config": {
     "forge": {
       "make_targets": {
-        "linux": ["deb", "rpm", "flatpak"],
-        "win32": ["squirrel"]
+        "linux": [
+          "deb",
+          "rpm",
+          "flatpak"
+        ],
+        "win32": [
+          "squirrel"
+        ]
       },
       "electronPackagerConfig": {
         "packageManager": "npm",

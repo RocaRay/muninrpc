@@ -5,9 +5,10 @@ import {
   RequestConfig,
   ClientStreamCbs,
   BidiAndServerStreamCbs,
+  ServerStreamHandler,
+  BidiStreamHandler,
   GrpcHandlerFactory,
 } from "../../lib/local/grpcHandlerFactory";
-import { cloneDeep } from "@babel/types";
 
 export enum mainRequestActionType {
   HANDLE_UNARY_REQUEST = "HANDLE_UNARY_REQUEST",
@@ -55,9 +56,9 @@ export const mainRequestActions = {
           dispatch(mainRequestActions.setGRPCResponse({response: error, tabKey: selectedTab}));
         });
     }
-  };
+  },
 
-  export const handleClientStreamStart = () => (dispatch, getState) => {
+  handleClientStreamStart: () => (dispatch, getState) => {
     const activeTab = getState().main.activeTab;
     const state = getState().main;
     const selectedTab = state.selectedTab;
@@ -96,12 +97,12 @@ export const mainRequestActions = {
         timeStamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         request: `${activeTab.selectedRequest} started on ${activeTab.baseConfig.grpcServerURI}`,
       };
-      const { writableStream } = handler.returnHandler();
+      const { writableStream } = handler.getEmitters();
       state.handlers[state.selectedTab] = writableStream;
     }
-  };
+  },
 
-  export const handleServerStreamStart = () => (dispatch, getState) => {
+  handleServerStreamStart: () => (dispatch, getState) => {
     const activeTab = getState().main.activeTab;
     const state = getState().main;
     const selectedTab = state.selectedTab;
@@ -124,9 +125,9 @@ export const mainRequestActions = {
         ...activeTab.baseConfig,
         ...requestConfig,
       };
-      const handler = GrpcHandlerFactory.createHandler(mergedConfig);
+      const handler = GrpcHandlerFactory.createHandler(mergedConfig) as ServerStreamHandler;
       handler.initiateRequest();
-      const { readableStream } = handler.returnHandler();
+      const { readableStream } = handler.getEmitters();
       state.handlers[state.selectedTab] = readableStream;
 
       state.handlerInfo[state.selectedTab].responseMetrics = {
@@ -134,9 +135,9 @@ export const mainRequestActions = {
         request: `${activeTab.selectedRequest} started on ${activeTab.baseConfig.grpcServerURI}`,
       };
     }
-  };
+  },
 
-  export const handleBidiStreamStart = () => (dispatch, getState) => {
+  handleBidiStreamStart: () => (dispatch, getState) => {
     const activeTab = getState().main.activeTab;
     const state = getState().main;
     const selectedTab = state.selectedTab;
@@ -147,7 +148,7 @@ export const mainRequestActions = {
         callbacks: {
           onDataReadCb: response => dispatch(mainRequestActions.setGRPCResponse({response: response, tabKey: selectedTab})),
           onEndReadCb: () => {
-            dispatch(handleStopStream());
+            dispatch(mainRequestActions.handleStopStream());
           },
         },
         argument: {},
@@ -156,22 +157,15 @@ export const mainRequestActions = {
         ...activeTab.baseConfig,
         ...requestConfig,
       };
-      const handler = GrpcHandlerFactory.createHandler(mergedConfig);
+      const handler = GrpcHandlerFactory.createHandler(mergedConfig) as BidiStreamHandler;
       handler.initiateRequest();
       state.handlerInfo[state.selectedTab].responseMetrics = {
         timeStamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         request: `${activeTab.selectedRequest} started on ${activeTab.baseConfig.grpcServerURI}`,
       };
-      const { writableStream } = handler.returnHandler();
+      const { writableStream } = handler.getEmitters();
       state.handlers[state.selectedTab] = writableStream;
     }
-  };
-
-  export const handleSendMessage = () => action(Type.HANDLE_SEND_MESSAGE);
-
-  export const handleRecieveMessage = () => action(Type.HANDLE_RECIEVE_MESSAGE);
-
-  export const handleStopStream = (type?: string) => action(Type.HANDLE_STOP_STREAM, type);
-}
-
-export type mainRequestActions = Omit<typeof mainRequestActions, "Type">;
+  },
+};
+// export type mainRequestActions = typeof mainRequestActions;
