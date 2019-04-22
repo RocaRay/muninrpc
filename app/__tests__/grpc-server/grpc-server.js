@@ -43,7 +43,25 @@ function CalculateAverage(call, callback) {
 }
 /**
  *
- * @param {Duplex} call The stream for incoming and outgoing messages
+ *  Server side streaming
+ *
+ */
+function TestServerStream(call) {
+    let stopID = setInterval( () => {
+        let randomInt = Math.floor(Math.random() * 100)
+        console.log('sending random int:',randomInt)
+        call.write({numb: randomInt})
+    }
+    , 500)
+    setTimeout( () => {
+        clearInterval(stopID);
+        call.end();
+    }, 1000 * 30)
+}
+/**
+ *
+ * Bi-directional Streaming
+ *
  */
 function ItemStreamer(call) {
     console.log("stream open");
@@ -53,7 +71,6 @@ function ItemStreamer(call) {
     });
     call.on("end", function () {
         call.end();
-        console.log("stream closed");
     });
 }
 function getServer() {
@@ -62,7 +79,8 @@ function getServer() {
         GetList: GetList,
         AddItem: AddItem,
         ItemStreamer: ItemStreamer,
-        CalculateAverage: CalculateAverage
+        CalculateAverage: CalculateAverage,
+        TestServerStream: TestServerStream
     });
     return server;
 }

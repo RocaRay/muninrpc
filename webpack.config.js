@@ -1,3 +1,4 @@
+// const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const shouldWatch = process.env.NODE_ENV === "development";
 
 module.exports = {
@@ -47,4 +48,8 @@ module.exports = {
       }
     ]
   },
+  optimization: {
+    checkWasmTypes: false,
+    minimize: false
+	},
 };
