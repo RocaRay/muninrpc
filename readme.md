@@ -24,15 +24,23 @@ Built on the shoulders of giants:
   - Large proto file? No problem. Search your messages and services for what you need.
   - Clean, beautiful, tabbed interface.
 
+### Screengrabs
 
-_
+#### Upload your protofiles
+![](https://muninrpc.dev/static/ex0-2f7b65fcbbb0f5c82174a2e09b729a9b.gif)
+
+#### Supports Streaming
+![](https://muninrpc.dev/static/ex1-c137b702eaeea7a111f57936584c9d60.gif)
+
+#### Tabbed Interface
+![](https://muninrpc.dev/static/ex2-0b0344c2be229df36a70ceeada27a61f.gif)
 
 
 ### Installation & Use
 
 We have compiled binaries available:
 
-Windows | [Mac](https://s3-us-west-1.amazonaws.com/elasticbeanstalk-us-west-1-763399177644/munin-rpc.zip) | Linux
+Windows | [Mac](https://s3-us-west-1.amazonaws.com/elasticbeanstalk-us-west-1-763399177644/munin-rpc-darwin.zip) | Linux
 
 
 _
@@ -71,3 +79,5 @@ Ray Yao *@RocaRay*
 Ed Ryan *@15ryane*
 
 Raven motif from [Silver Spiral](https://www.zazzle.com/mbr/238845459138370735).
+
+Check out our [site](http://muninrpc.dev)!
