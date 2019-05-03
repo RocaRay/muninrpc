@@ -31,9 +31,9 @@ export function Right(props: MainModel & actions, context?: any) {
   const clientJSON = [];
   let displayedJSON: [] | {} = [];
 
-  if (props.leftArray[0]) {
-    if (Array.isArray(props.handlerInfo[props.selectedTab].serverResponse)) {
-      props.handlerInfo[props.selectedTab].serverResponse.forEach(message => {
+  if (leftArray[0]) {
+    if (Array.isArray(handlerInfo[selectedTab].serverResponse)) {
+      handlerInfo[selectedTab].serverResponse.forEach(message => {
         // console.log('message:', message)
         if (message.type === "read") {
           serverJSON.push(message.payload);
@@ -43,13 +43,10 @@ export function Right(props: MainModel & actions, context?: any) {
         }
       });
     } else {
-      serverJSON = props.handlerInfo[props.selectedTab].serverResponse;
+      serverJSON = handlerInfo[selectedTab].serverResponse;
     }
 
     displayedJSON = tabInfo[selectedTab].activeResponseTab === "server" ? serverJSON : clientJSON;
-    // console.log('displayed JSON', displayedJSON)
-    // console.log('server JSON', serverJSON)
-    // console.log('client JSON', clientJSON)
   }
 
   return (
