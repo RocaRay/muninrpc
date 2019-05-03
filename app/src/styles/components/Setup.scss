@@ -1,0 +1,99 @@
+.setup {
+  height: 100%;
+  width: 100%;
+  background: white;
+  padding: 22px 0px 0px 10%;
+
+  input {
+    width: 100%;
+  }
+
+  h2 {
+    border-bottom: 1px solid lightgray;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    color: darken(#2699FB, 20%);
+    height: 20px;
+    width: 20px;
+    font-weight: 600;
+    margin-right: 8px;
+    border-radius: 6px;
+    transition: 0.2s ease all;
+  }
+  button:hover {
+    color:white;
+    background: #2699FB;
+  }
+  .first {
+    margin-top: 8px;
+  }
+
+  .setup-area {
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 0 8px;
+    padding-top: 16px;
+  
+    h2 {
+      border-top: 1px solid darken(#2699FB, 20%);
+      padding-top: 8px;
+    }
+  
+    li {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: flex-start;
+      align-items: center;
+      align-content: center;
+      padding: 10px 0;
+      padding-left: 12px;
+      border-left: 1px solid #2699FB;
+      transition: 0.2s ease all;
+
+      .li-body {
+
+        display: flex;
+        flex-flow: column nowrap;
+
+        .li-body-top {
+          display: flex;
+          font-weight: 400;
+          color: #2699FB;
+          font-size: 1.2rem;
+          margin-bottom: 8px;
+        }
+
+        .li-body-bottom {
+          display: flex;
+          font-weight: 200;
+          color: grey;
+          font-size: 0.7rem;
+
+          .message {
+            margin-right: 10px;
+          }
+          
+        }
+      }
+    }
+
+    input {
+      margin-left: 16px;
+      flex-grow: 1;
+    }
+
+    .no-fields {
+      display: flex;
+      margin-top: -4px;
+      font-size: 0.8rem;
+    }
+
+  }
+
+} 
+

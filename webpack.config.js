@@ -17,29 +17,27 @@ module.exports = {
     filename: "bundle.js",
   },
 
-  devtool: "source-map",
-
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],
   },
 
   module: {
     rules: [
-      {
-        test: /\.tsx?$/,
+      { 
+        test: /\.tsx?$/, 
         use: [
           {
-            loader: "ts-loader",
+            loader: 'ts-loader',
             options: {
-              transpileOnly: true,
-            },
-          },
-        ],
+              transpileOnly: true
+            }
+          }
+        ] 
       },
       {
-        test: /\.scss$/,
+        test: /\.css$/,
         exclude: /(node_modules|bower_components)/,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        use: ['style-loader', 'css-loader']
       },
       {
         test: /\.(png|jpg|gif|svg)$/,

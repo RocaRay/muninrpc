@@ -2,16 +2,17 @@
   "name": "munin-rpc",
   "version": "1.0.0",
   "description": "protobuf and HTTP2 testing tool",
-  "main": "main_process.js",
+  "main": "./app/src/main_process.js",
   "scripts": {
     "bundle": "webpack --mode development",
-    "start": "export NODE_ENV=production; npm-run-all --parallel bundle serve",
     "dev": "export NODE_ENV=development; npm-run-all --parallel bundle serve",
     "serve": "electron .",
+    "start": "electron-forge start",
+    "test": "jest",
     "postinstall": "npm rebuild --target=4.0.0 --runtime=electron --dist-url=https://atom.io/download/electron",
     "grpcserver": "node app/__tests__/grpc-server/grpc-server.js",
-    "test": "jest --verbose",
-    "build": "export NODE_ENV=production; webpack"
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "jest": {
     "globals": {
@@ -36,6 +37,9 @@
     "@types/webpack": "^4.4.26",
     "@types/webpack-env": "^1.13.9",
     "babel-loader": "^8.0.5",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
     "css-loader": "^0.28.11",
     "electron": "4.0.0",
     "electron-devtools-installer": "^2.2.4",
@@ -70,5 +74,30 @@
     "react-redux": "^6.0.1",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0"
+  },
+  "config": {
+    "forge": {
+      "make_targets": {
+        "linux": ["deb", "rpm", "flatpak"],
+        "win32": ["squirrel"]
+      },
+      "electronPackagerConfig": {
+        "packageManager": "npm",
+        "icon": "raven.icns"
+      },
+      "electronWinstallerConfig": {
+        "name": "munin_rpc"
+      },
+      "electronInstallerDebian": {},
+      "electronInstallerRedhat": {},
+      "github_repository": {
+        "owner": "",
+        "name": ""
+      },
+      "windowsStoreConfig": {
+        "packageName": "",
+        "name": "muninrpc"
+      }
+    }
   }
 }
