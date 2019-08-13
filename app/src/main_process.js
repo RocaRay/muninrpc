@@ -3,7 +3,7 @@ const electron = require('electron')
 const {app, BrowserWindow} = electron
 
 // To avoid being garbage collected
-let mainWindow
+let mainWindow;
 
 app.on('ready', () => {
 
@@ -23,6 +23,7 @@ app.on('ready', () => {
 
     mainWindow.loadFile(`./app/index.html`)
 
+    /* Uncomment below to enable devtools */
     // installExtension.default(installExtension.REACT_DEVELOPER_TOOLS)
     // .then((name) => console.log(`Added Extension:  ${name}`))
     // .catch((err) => console.log('An error occurred: ', err));
@@ -32,5 +33,4 @@ app.on('ready', () => {
     // .catch((err) => console.log('An error occurred: ', err));
 
     // mainWindow.webContents.openDevTools()
-
 })

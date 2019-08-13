@@ -12,6 +12,7 @@ export enum mainActionType {
   UPDATE_TAB_NAMES = "UPDATE_TAB_NAMES",
 }
 
+//actions for header and tabs in header
 export const mainActions = {
   getTabState: state => action(mainActionType.GET_TAB_STATE, state),
 

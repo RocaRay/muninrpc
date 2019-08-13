@@ -1,5 +1,6 @@
 import * as protoLoader from "@grpc/proto-loader";
 
+// function to parse a proto file into a pckg definition
 export function loadProtoFile(protoPath: string): protoLoader.PackageDefinition | Error {
   try {
     const packageDefinition = protoLoader.loadSync(protoPath, {
@@ -15,6 +16,7 @@ export function loadProtoFile(protoPath: string): protoLoader.PackageDefinition 
   }
 }
 
+//parses pckg definition by separating the Messages and Services, and returning an object with those 2 properties
 export function parsePackageDefinition(pkgDefn: protoLoader.PackageDefinition) {
   const protoMessages: {
     [index: string]: protoLoader.MessageTypeDefinition;

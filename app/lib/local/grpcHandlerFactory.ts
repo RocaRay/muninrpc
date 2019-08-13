@@ -2,6 +2,7 @@ import * as grpc from "grpc";
 import * as protoLoader from "@grpc/proto-loader";
 import { applyMixins } from "../../src/utils/";
 
+//Base properties that every config object will have
 export interface BaseConfig {
   grpcServerURI: string;
   packageDefinition: protoLoader.PackageDefinition;
@@ -10,6 +11,7 @@ export interface BaseConfig {
   onErrCb: (err: Error) => void;
 }
 
+//Req config properties that every Request object will have
 export interface RequestConfig<T extends void | ClientStreamCbs | BidiAndServerStreamCbs> {
   requestName: string;
   callType: CallType;
@@ -17,12 +19,14 @@ export interface RequestConfig<T extends void | ClientStreamCbs | BidiAndServerS
   callbacks: T;
 }
 
+//callbacks for client stream handlers
 export interface ClientStreamCbs {
   // on end to fire of any render udpates or tests
   onEndReadCb: (a: any) => void;
   onDataWriteCb?: (a: any) => void;
 }
 
+//callbacks for bidi stream handlers
 export interface BidiAndServerStreamCbs {
   // on end to fire any intermediate render updates
   onDataReadCb: (a: any) => void;
@@ -31,6 +35,7 @@ export interface BidiAndServerStreamCbs {
   onDataWriteCb?: (a: any) => void;
 }
 
+//the 4 types of calls
 export enum CallType {
   UNARY_CALL = "UNARY_CALL",
   CLIENT_STREAM = "CLIENT_STREAM",
@@ -40,6 +45,7 @@ export enum CallType {
 
 type GrpcReaderWriter = GrpcReader & GrpcWriter;
 
+//class for reading from a stream (server-push, bidi)
 class GrpcReader {
   data: { type: string; payload: object }[];
   // observers: Observer;
@@ -57,6 +63,7 @@ class GrpcReader {
   }
 }
 
+//class for writing to a stream (client stream, bidi)
 class GrpcWriter {
   data: { type: string; payload: object }[];
   // observers: Observer;
@@ -87,6 +94,7 @@ class GrpcWriter {
   }
 }
 
+//class for a all instances of handlers
 abstract class GrpcHandler {
   protected packageName: string;
   protected serviceName: string;
@@ -116,6 +124,7 @@ abstract class GrpcHandler {
   }
 }
 
+//class for unary calls
 class UnaryHandler extends GrpcHandler {
   constructor(config: BaseConfig & RequestConfig<void>) {
     super(config);
@@ -133,6 +142,7 @@ class UnaryHandler extends GrpcHandler {
   }
 }
 
+//class for client stream calls
 class ClientStreamHandler extends GrpcHandler implements GrpcWriter {
   private onEndReadCb: (a: any) => any;
   public onDataWriteCb: (data: object) => void;
@@ -170,6 +180,7 @@ class ClientStreamHandler extends GrpcHandler implements GrpcWriter {
   }
 }
 
+// class for server push calls
 export class ServerStreamHandler extends GrpcHandler implements GrpcReader {
   public onDataReadCb: (a: object) => void;
   public onEndReadCb: (a: object) => void;
@@ -209,6 +220,7 @@ export class ServerStreamHandler extends GrpcHandler implements GrpcReader {
   }
 }
 
+//class for bidirectional stream calls
 export class BidiStreamHandler extends GrpcHandler implements GrpcReaderWriter {
   public onDataReadCb: (a: any) => any;
   public onEndReadCb: (a: any) => any;
@@ -253,7 +265,7 @@ export class BidiStreamHandler extends GrpcHandler implements GrpcReaderWriter {
   }
 }
 
-//factory function to create gRPC connections
+//factory function to create gRPC connections; returns handlers
 export class GrpcHandlerFactory {
   static createHandler(
     config: BaseConfig & RequestConfig<BidiAndServerStreamCbs>,

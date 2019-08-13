@@ -43,6 +43,7 @@
     "css-loader": "^0.28.11",
     "electron": "4.0.0",
     "electron-devtools-installer": "^2.2.4",
+    "electron-prebuilt-compile": "4.0.0",
     "electron-reload": "^1.4.0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
@@ -78,8 +79,14 @@
   "config": {
     "forge": {
       "make_targets": {
-        "linux": ["deb", "rpm", "flatpak"],
-        "win32": ["squirrel"]
+        "linux": [
+          "deb",
+          "rpm",
+          "flatpak"
+        ],
+        "win32": [
+          "squirrel"
+        ]
       },
       "electronPackagerConfig": {
         "packageManager": "npm",

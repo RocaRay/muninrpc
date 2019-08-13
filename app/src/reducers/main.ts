@@ -17,7 +17,6 @@ const initialState: MainModel = {
 export const mainReducer = (state: MainModel = initialState, action: Types.RootAction) => {
   switch (action.type) {
     case mainActionType.GET_TAB_STATE: {
-      // case getType(mainActions.getTabState): {
       return {
         ...state,
         activeTab: {
