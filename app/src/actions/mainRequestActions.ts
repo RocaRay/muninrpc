@@ -20,6 +20,8 @@ export enum mainRequestActionType {
   HANDLE_STOP_STREAM = "HANDLE_STOP_STREAM",
   HANDLE_RECIEVE_MESSAGE = "HANDLE_RECIEVE_MESSAGE",
 }
+
+//actions for connection handlers
 export const mainRequestActions = {
   handleSendMessage: () => action(mainRequestActionType.HANDLE_SEND_MESSAGE),
   handleRecieveMessage: () => action(mainRequestActionType.HANDLE_RECIEVE_MESSAGE),
@@ -64,8 +66,10 @@ export const mainRequestActions = {
     const selectedTab = state.selectedTab;
 
     if (activeTab.requestConfig.callType === CallType.CLIENT_STREAM) {
+      //create config object
       const requestConfig: RequestConfig<ClientStreamCbs> = {
         ...activeTab.requestConfig,
+        //customize callbacks functions
         callbacks: {
           onEndReadCb: res => {
             dispatch(
@@ -87,17 +91,20 @@ export const mainRequestActions = {
         },
         argument: {},
       };
+      //merge configs to create final config object
       const mergedConfig: BaseConfig & RequestConfig<ClientStreamCbs> = {
         ...activeTab.baseConfig,
         ...requestConfig,
       };
+      //create handler using final config object, and store it in global state
       const handler = GrpcHandlerFactory.createHandler(mergedConfig);
-      handler.initiateRequest();
+      handler.initiateRequest(); //start the stream
+      //store server response in global state, with a timestamp
       state.handlerInfo[state.selectedTab].responseMetrics = {
         timeStamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         request: `${activeTab.selectedRequest} started on ${activeTab.baseConfig.grpcServerURI}`,
       };
-      const { writableStream } = handler.getEmitters();
+      const { writableStream } = handler.getEmitters(); //create a writable stream and store it in global state
       state.handlers[state.selectedTab] = writableStream;
     }
   },
@@ -168,4 +175,3 @@ export const mainRequestActions = {
     }
   },
 };
-// export type mainRequestActions = typeof mainRequestActions;

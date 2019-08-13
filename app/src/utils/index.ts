@@ -10,6 +10,7 @@ export function omit<T extends object, K extends keyof T>(target: T, ...omitKeys
   );
 }
 
+//function to be used for filtering lists based on trie recommendations
 export function filterObject(o: object, recommendations: string[], search: string): object {
   let filtered = {};
   if (recommendations.length) {
